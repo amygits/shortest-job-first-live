@@ -8,7 +8,9 @@ struct process {
 	int tau;
 	double alpha;
 	int* actualRT;	
+        int est; // est. runtime for live runs
 };
+
 
 struct process* SYS_PROCESS[];
 struct process* shortest[];
@@ -49,6 +51,9 @@ void readProcessData(FILE *file, int ticks, struct process* process) {
     
 }
 
+/*
+ * Swaps two struct processes*
+ */
 void swap (struct process* xp, struct process* yp) {
     
     struct process temp = *xp;
@@ -57,6 +62,9 @@ void swap (struct process* xp, struct process* yp) {
     
 }
 
+/*
+ * Sorts an array of struct process pointers according to actual runtime at tick #
+ */
 void bubbleSort(int tick, struct process* procArr[], int processes){
     
     //printf("bubble sort\n");
@@ -73,20 +81,24 @@ void bubbleSort(int tick, struct process* procArr[], int processes){
 
 /*
  * Calculates and displays shortest job first from dataset of processes
+ * Also displays turnaround and waiting times
  * @param array of process pointers
  */
 void shortestJobFirst(int ticks, int processes, struct process* procArr[]) {
-    printf("shortest job first lets gooo\n");
+    
+    printf("Starting shortest jobs first simulation..\n");
     int tick;
     int proc;
-    int i;
-    struct process* min;
     
-    
+    // For each tick
     for(tick = 0; tick < ticks; tick++){
         int sum = 0;
         printf("Simulating %d tick of processes at time %d\n", tick, time);
+        
+        // Sort process array based on actual runtime @ tick value
         bubbleSort(tick, procArr, processes);
+        
+        // Running through each process in process array
         for(proc = 0; proc < processes; proc++){
             printf("Process %d took %d.\n", procArr[proc]->PID, procArr[proc]->actualRT[tick]);
             time = time + procArr[proc]->actualRT[tick];
@@ -94,14 +106,22 @@ void shortestJobFirst(int ticks, int processes, struct process* procArr[]) {
         }
         turnaround = turnaround + sum + procArr[0]->actualRT[tick];
         waiting = waiting + procArr[0]->actualRT[tick];
-        
     }
+    
     printf("Turnaround: %d\n", turnaround);
     printf("Waiting: %d\n", waiting);
-     printf("end shortest job first\n");
+    printf("End shortest job first sim.\n");
    
     }
      
+
+void shortestJobFirstLive(int ticks, int processes, struct process* procArr[]) {
+    printf("Starting shortest jobs first simulation..\n");
+    int tick;
+    int proc;
+    
+}
+
 
 int main(int argc, char **argv) {
 
@@ -110,6 +130,7 @@ int main(int argc, char **argv) {
     int ticks;
     
     if (argc != 2) {
+        // Fail case output
         printf("Usage: %s <filename>\n", argv[0]);
     }
     
@@ -136,7 +157,11 @@ int main(int argc, char **argv) {
             }
             printf("Read complete\n");
             
+            // run shortest jobs first 
             shortestJobFirst(ticks, processes, SYS_PROCESS);
+            //reset timer
+            time = 0;
+            
             fclose(readFile);
         }
              // if filename doesn't end with ".txt"
