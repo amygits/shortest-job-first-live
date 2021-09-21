@@ -8,15 +8,13 @@ struct process {
 	int tau;
 	double alpha;
 	int* actualRT;	
-        int est; // est. runtime for live runs
+        
 };
 
 
 struct process* SYS_PROCESS[];
 struct process* shortest[];
 int time = 0;
-int turnaround = 0;
-int waiting = 0;
 
 
 /*
@@ -78,6 +76,23 @@ void bubbleSort(int tick, struct process* procArr[], int processes){
     }
 }
 
+/*
+ * Sorts an array of struct process pointers according to estimated runtime at tick #
+ */
+void bubbleSortLive(int tick, struct process* procArr[], int processes){
+    
+    //printf("bubble sort LIVE\n");
+    int i, j;
+    for (i = 0; i < processes-1; i++){
+        for (j = 0; j < processes-i-1; j++) {
+            if (procArr[j]->tau > procArr[j + 1]->tau) {
+                swap(&procArr[j], &procArr[j+1]);
+            } 
+        }
+    }
+}
+
+
 
 /*
  * Calculates and displays shortest job first from dataset of processes
@@ -89,11 +104,13 @@ void shortestJobFirst(int ticks, int processes, struct process* procArr[]) {
     printf("Starting shortest jobs first simulation..\n");
     int tick;
     int proc;
+    int turnaround = 0;
+    int waiting = 0;
     
     // For each tick
     for(tick = 0; tick < ticks; tick++){
         int sum = 0;
-        printf("Simulating %d tick of processes at time %d\n", tick, time);
+        printf("Simulating tick-%d of processes at time %d\n", tick, time);
         
         // Sort process array based on actual runtime @ tick value
         bubbleSort(tick, procArr, processes);
@@ -116,12 +133,44 @@ void shortestJobFirst(int ticks, int processes, struct process* procArr[]) {
      
 
 void shortestJobFirstLive(int ticks, int processes, struct process* procArr[]) {
-    printf("Starting shortest jobs first simulation..\n");
+    printf("Starting shortest jobs first LIVE simulation..\n");
     int tick;
     int proc;
+    int est_error = 0;
+    int turnaround = 0;
+    int waiting = 0;
     
+    
+    //for each tick
+    for(tick=0;tick<ticks;tick++){
+        printf("Simulating tick-%d of processes at time %d\n", tick, time);
+        bubbleSortLive(tick, procArr, processes);
+        
+        for(proc = 0; proc < processes; proc++){
+            printf("Process %d was estimated for %d took %d.\n", procArr[proc]->PID, procArr[proc]->tau, procArr[proc]->actualRT[tick]);
+            est_error += abs(procArr[proc]->tau - procArr[proc]->actualRT[tick]);
+            procArr[proc]->tau = ((procArr[proc]->tau * procArr[proc]->alpha) + (procArr[proc]->actualRT[tick] * procArr[proc]->alpha));
+            
+            //printf("Estimation error: %d\n", est_error);
+        }
+    }
+    //printf("Waiting: %d\n", waiting);
+    //printf("Turnaround time: %d\n", turnaround);
+    printf("Estimation error: %d\n", est_error);
+    printf("Ending LIVE SJF sim.\n");
 }
 
+void destroy_processes(int processes, int ticks, struct processes* procArr[]){
+    
+    int i, j;
+    for (i=0; i < processes; i++){
+        free(procArr[i]);
+        procArr[i] = NULL;
+    }
+    free(procArr);
+    procArr = NULL;
+    
+}
 
 int main(int argc, char **argv) {
 
@@ -161,6 +210,8 @@ int main(int argc, char **argv) {
             shortestJobFirst(ticks, processes, SYS_PROCESS);
             //reset timer
             time = 0;
+            // run shortest jobs first live
+            shortestJobFirstLive(ticks, processes, SYS_PROCESS);
             
             fclose(readFile);
         }
