@@ -11,7 +11,12 @@ struct process {
 };
 
 struct process* SYS_PROCESS[];
+struct process* shortest[];
 int time = 0;
+int turnaround = 0;
+int waiting = 0;
+
+
 /*
  Creates a process with a size ticks array of runtime data
  */
@@ -44,6 +49,28 @@ void readProcessData(FILE *file, int ticks, struct process* process) {
     
 }
 
+void swap (struct process* xp, struct process* yp) {
+    
+    struct process temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+    
+}
+
+void bubbleSort(int tick, struct process* procArr[], int processes){
+    
+    //printf("bubble sort\n");
+    int i, j;
+    for (i = 0; i < processes-1; i++){
+        for (j = 0; j < processes-i-1; j++) {
+            if (procArr[j]->actualRT[tick] > procArr[j + 1]->actualRT[tick]) {
+                swap(&procArr[j], &procArr[j+1]);
+            } 
+        }
+    }
+}
+
+
 /*
  * Calculates and displays shortest job first from dataset of processes
  * @param array of process pointers
@@ -52,17 +79,24 @@ void shortestJobFirst(int ticks, int processes, struct process* procArr[]) {
     printf("shortest job first lets gooo\n");
     int tick;
     int proc;
+    int i;
+    struct process* min;
+    
+    
     for(tick = 0; tick < ticks; tick++){
+        
         printf("Simulating %d tick of processes at time %d\n", tick, time);
-       
+        bubbleSort(tick, procArr, processes);
         for(proc = 0; proc < processes; proc++){
-            printf("Process %d took %d.\n", proc, procArr[proc]->actualRT[tick]);
+            printf("Process %d took %d.\n", procArr[proc]->PID, procArr[proc]->actualRT[tick]);
             time = time + procArr[proc]->actualRT[tick];
         }
     }
-    printf("end shortest job first\n");
     
-}
+     printf("end shortest job first\n");
+   
+    }
+     
 
 int main(int argc, char **argv) {
 
