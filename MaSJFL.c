@@ -1,3 +1,13 @@
+/**
+ * Purpose: This programs simulates using the shortest-job-first algorithms
+ * To determine which processes should be scheduled in what order.
+ * Takes in data file with process data
+ * 
+ * @author Ma
+ * @version 9.21.21
+ * Completion time: 8 hours
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -20,6 +30,7 @@ int time = 0;
 /*
  Creates a process with a size ticks array of runtime data
  */
+
 struct process* process_init(int ticks) {
     
     printf("Initializing process..");
@@ -30,7 +41,9 @@ struct process* process_init(int ticks) {
     return newProcess;
 }
 
-// Reads process data from file and stores into a process 
+/*
+ * Reads process data from file and stores into a process 
+ */
 void readProcessData(FILE *file, int ticks, struct process* process) {
     
     printf("Reading process data..");
@@ -97,11 +110,11 @@ void bubbleSortLive(int tick, struct process* procArr[], int processes){
 /*
  * Calculates and displays shortest job first from dataset of processes
  * Also displays turnaround and waiting times
- * @param array of process pointers
+ * @param array of process pointers, int ticks, int processes
  */
 void shortestJobFirst(int ticks, int processes, struct process* procArr[]) {
     
-    printf("Starting shortest jobs first simulation..\n");
+    printf("\n=Shortest Job First==\n");
     int tick;
     int proc;
     int turnaround = 0;
@@ -127,13 +140,17 @@ void shortestJobFirst(int ticks, int processes, struct process* procArr[]) {
     
     printf("Turnaround: %d\n", turnaround);
     printf("Waiting: %d\n", waiting);
-    printf("End shortest job first sim.\n");
+    printf("==Ending Shortest Job First Live==\n");
    
     }
      
-
+/*
+ * Calculates and displays shortest job first based on estimated runtime from dataset of processes
+ * Also displays estimate error, turnaround, and waiting times
+ * @param array of process pointers, int ticks, int processes
+ */
 void shortestJobFirstLive(int ticks, int processes, struct process* procArr[]) {
-    printf("Starting shortest jobs first LIVE simulation..\n");
+    printf("\n==Shortest Job First Live==\n");
     int tick;
     int proc;
     int est_error = 0;
@@ -143,6 +160,7 @@ void shortestJobFirstLive(int ticks, int processes, struct process* procArr[]) {
     
     //for each tick
     for(tick=0;tick<ticks;tick++){
+        int sum = 0;
         printf("Simulating tick-%d of processes at time %d\n", tick, time);
         bubbleSortLive(tick, procArr, processes);
         
@@ -150,27 +168,18 @@ void shortestJobFirstLive(int ticks, int processes, struct process* procArr[]) {
             printf("Process %d was estimated for %d took %d.\n", procArr[proc]->PID, procArr[proc]->tau, procArr[proc]->actualRT[tick]);
             est_error += abs(procArr[proc]->tau - procArr[proc]->actualRT[tick]);
             procArr[proc]->tau = ((procArr[proc]->tau * procArr[proc]->alpha) + (procArr[proc]->actualRT[tick] * procArr[proc]->alpha));
-            
+            sum = sum + procArr[proc]->tau;
             //printf("Estimation error: %d\n", est_error);
         }
+        turnaround = turnaround + sum + procArr[0]->tau;
+        waiting = waiting + procArr[0]->tau;
     }
-    //printf("Waiting: %d\n", waiting);
-    //printf("Turnaround time: %d\n", turnaround);
+    printf("Waiting time: %d\n", waiting);
+    printf("Turnaround time: %d\n", turnaround);
     printf("Estimation error: %d\n", est_error);
-    printf("Ending LIVE SJF sim.\n");
+    printf("==Ending Shortest Job First Live==\n");
 }
 
-void destroy_processes(int processes, int ticks, struct processes* procArr[]){
-    
-    int i, j;
-    for (i=0; i < processes; i++){
-        free(procArr[i]);
-        procArr[i] = NULL;
-    }
-    free(procArr);
-    procArr = NULL;
-    
-}
 
 int main(int argc, char **argv) {
 
@@ -213,6 +222,13 @@ int main(int argc, char **argv) {
             // run shortest jobs first live
             shortestJobFirstLive(ticks, processes, SYS_PROCESS);
             
+            printf("clearing memory..");
+            for (i = 0; i < processes; i++){
+                free(SYS_PROCESS[i]);
+                SYS_PROCESS[i] = NULL;
+            }
+            
+            printf("cleared memory\n");
             fclose(readFile);
         }
              // if filename doesn't end with ".txt"
