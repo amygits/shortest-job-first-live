@@ -84,15 +84,20 @@ void shortestJobFirst(int ticks, int processes, struct process* procArr[]) {
     
     
     for(tick = 0; tick < ticks; tick++){
-        
+        int sum = 0;
         printf("Simulating %d tick of processes at time %d\n", tick, time);
         bubbleSort(tick, procArr, processes);
         for(proc = 0; proc < processes; proc++){
             printf("Process %d took %d.\n", procArr[proc]->PID, procArr[proc]->actualRT[tick]);
             time = time + procArr[proc]->actualRT[tick];
+            sum = sum + procArr[proc]->actualRT[tick];
         }
+        turnaround = turnaround + sum + procArr[0]->actualRT[tick];
+        waiting = waiting + procArr[0]->actualRT[tick];
+        
     }
-    
+    printf("Turnaround: %d\n", turnaround);
+    printf("Waiting: %d\n", waiting);
      printf("end shortest job first\n");
    
     }
