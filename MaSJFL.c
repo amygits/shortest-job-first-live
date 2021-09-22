@@ -23,7 +23,6 @@ struct process {
 
 
 struct process* SYS_PROCESS[];
-struct process* shortest[];
 int time = 0;
 
 
@@ -65,7 +64,7 @@ void readProcessData(FILE *file, int ticks, struct process* process) {
 /*
  * Swaps two struct processes*
  */
-void swap (struct process* xp, struct process* yp) {
+void swap(struct process* xp, struct process* yp) {
     
     struct process temp = *xp;
     *xp = *yp;
@@ -119,7 +118,9 @@ void shortestJobFirst(int ticks, int processes, struct process* procArr[]) {
     int proc;
     int turnaround = 0;
     int waiting = 0;
-    
+    //printf("processes:%d\n", processes);
+    //size_t n = processes/sizeof(procArr[0]);
+    //printf("%d\n", n);
     // For each tick
     for(tick = 0; tick < ticks; tick++){
         int sum = 0;
@@ -156,11 +157,11 @@ void shortestJobFirstLive(int ticks, int processes, struct process* procArr[]) {
     int est_error = 0;
     int turnaround = 0;
     int waiting = 0;
-    
+    int sum;
     
     //for each tick
     for(tick=0;tick<ticks;tick++){
-        int sum = 0;
+        sum = 0;
         printf("Simulating tick-%d of processes at time %d\n", tick, time);
         bubbleSortLive(tick, procArr, processes);
         
@@ -168,10 +169,16 @@ void shortestJobFirstLive(int ticks, int processes, struct process* procArr[]) {
             printf("Process %d was estimated for %d took %d.\n", procArr[proc]->PID, procArr[proc]->tau, procArr[proc]->actualRT[tick]);
             est_error += abs(procArr[proc]->tau - procArr[proc]->actualRT[tick]);
             procArr[proc]->tau = ((procArr[proc]->tau * procArr[proc]->alpha) + (procArr[proc]->actualRT[tick] * procArr[proc]->alpha));
-            sum = sum + procArr[proc]->tau;
+            time = time + procArr[proc]->actualRT[tick];
+            sum = sum + procArr[proc]->actualRT[tick];
+            //printf("sum: %d + %d\n", sum, procArr[proc]->actualRT[tick]);
             //printf("Estimation error: %d\n", est_error);
         }
-        turnaround = turnaround + sum + procArr[0]->tau;
+        //printf("sum: %d \n", sum);
+        
+        //printf("min actual val: %d\n", procArr[0]->actualRT[tick]);
+        turnaround += (sum + procArr[0]->actualRT[tick]);
+        //printf("turnaround: %d\n", turnaround);
         waiting = waiting + procArr[0]->tau;
     }
     printf("Waiting time: %d\n", waiting);
