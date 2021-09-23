@@ -5,7 +5,7 @@
  * 
  * @author Ma
  * @version 9.21.21
- * Completion time: 8 hours
+ * Completion time: 9 hours
  */
 
 #include <stdlib.h>
@@ -118,9 +118,9 @@ void shortestJobFirst(int ticks, int processes, struct process* procArr[]) {
     int proc;
     int turnaround = 0;
     int waiting = 0;
-    //printf("processes:%d\n", processes);
-    //size_t n = processes/sizeof(procArr[0]);
-    //printf("%d\n", n);
+    printf("processes:%d\n", processes);
+    size_t n = sizeof(&procArr)/sizeof(&procArr[0]);
+    printf("%d\n", n);
     // For each tick
     for(tick = 0; tick < ticks; tick++){
         int sum = 0;
@@ -166,9 +166,14 @@ void shortestJobFirstLive(int ticks, int processes, struct process* procArr[]) {
         bubbleSortLive(tick, procArr, processes);
         
         for(proc = 0; proc < processes; proc++){
-            printf("Process %d was estimated for %d took %d.\n", procArr[proc]->PID, procArr[proc]->tau, procArr[proc]->actualRT[tick]);
+            printf("Process %d was estimated for %d took %d.\n", 
+            	procArr[proc]->PID, procArr[proc]->tau, procArr[proc]->actualRT[tick]);
+            	
             est_error += abs(procArr[proc]->tau - procArr[proc]->actualRT[tick]);
-            procArr[proc]->tau = ((procArr[proc]->tau * procArr[proc]->alpha) + (procArr[proc]->actualRT[tick] * procArr[proc]->alpha));
+            
+            procArr[proc]->tau = ((procArr[proc]->tau * procArr[proc]->alpha) 
+            	+ (procArr[proc]->actualRT[tick] * procArr[proc]->alpha));
+            	
             time = time + procArr[proc]->actualRT[tick];
             sum = sum + procArr[proc]->actualRT[tick];
             //printf("sum: %d + %d\n", sum, procArr[proc]->actualRT[tick]);
